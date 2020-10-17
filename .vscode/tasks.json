@@ -3,20 +3,14 @@
 	"tasks": [
 		{
 			"type": "shell",
-			"label": "C/C++: gcc build active file",
-			"command": "/usr/bin/gcc",
+			"label": "Make",
+			"command": "make",
 			"args": [
-				"-g",
-				"${file}",
-				"-o",
-				"${fileDirname}/${fileBasenameNoExtension}"
+				"all"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}"
 			},
-			"problemMatcher": [
-				"$gcc"
-			],
 			"group": {
 				"kind": "build",
 				"isDefault": true
