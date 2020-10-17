@@ -26,13 +26,24 @@ void loop()
 		fscanf(stdin, "%d", &argumentsCount);
 
 
-		char *args = malloc(argumentsCount * sizeof(char));
+		char** args = (char**)malloc(argumentsCount * sizeof(char*));
+
 		for (int i = 0; i < argumentsCount; i++)
 		{
-			fprintf(stdout, "Digite o argumento %d: \n", i);
+			fprintf(stdout, "Digite o argumento %d: ", i + 1);
+
+			char* arg = (char*)malloc(ARGUMENT_BUFFER_SIZE * sizeof(char));
+			fscanf(stdin, "%s", arg);
+			args[i] = arg;
 		}
 		
-		fprintf(stdout, "%s %d\n\n", command, argumentsCount);
+		fprintf(stdout, "%s", command);
+		for (int i = 0; i < argumentsCount; i++)
+		{
+			fprintf(stdout, " %s", args[i]);
+		}
+		fprintf(stdout, "\n");
+
 	} while (status == EXIT_SUCCESS);
 
 	free(command);
