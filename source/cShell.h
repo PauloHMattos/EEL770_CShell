@@ -10,3 +10,9 @@
  * Execute: Run the parsed command.
  */
 void loop();
+
+char* getCommand();
+
+char** getArguments(int* argumentsCount);
+
+void freeArray(void** array, int count);
