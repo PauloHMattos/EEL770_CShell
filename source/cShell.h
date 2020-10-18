@@ -14,3 +14,5 @@ void loop();
 int getCommand(char* command);
 
 int getArguments(char** arguments, int* argumentsCount);
+
+int launchProgram(char* command, char** arguments, int argumentsCount);
