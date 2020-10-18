@@ -11,8 +11,6 @@
  */
 void loop();
 
-char* getCommand();
+int getCommand(char* command);
 
-char** getArguments(int* argumentsCount);
-
-void freeArray(void** array, int count);
+int getArguments(char** arguments, int* argumentsCount);

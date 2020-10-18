@@ -2,6 +2,9 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include "cShell.h"
+#include "Constants.h"
+#include "input.h"
+#include "memory.h"
 
 int main(int argc, char **argv)
 {
@@ -12,12 +15,18 @@ int main(int argc, char **argv)
 void loop()
 {
 	int status = 0;
+	char* command = (char*)malloc(COMMAND_BUFFER_SIZE* sizeof(char*));
+	char** arguments = (char**)malloc(MAX_ARGUMENTS_COUNT * sizeof(char*));
+	for (int i = 0; i < MAX_ARGUMENTS_COUNT; i++)
+	{
+		arguments[i] = (char*)malloc(ARGUMENT_BUFFER_SIZE * sizeof(char*));
+	}
 
 	do
 	{
 		int argumentsCount = 0;
-		char* command = getCommand();
-		char** arguments = getArguments(&argumentsCount);
+		int commandStatus = getCommand(command);
+		int argumentsStatus = getArguments(arguments, &argumentsCount);
 		
 		fprintf(stdout, "%s", command);
 		for (int i = 0; i < argumentsCount; i++)
@@ -25,43 +34,44 @@ void loop()
 			fprintf(stdout, " %s", arguments[i]);
 		}
 		fprintf(stdout, "\n\n");
-
-		free(command);
-		freeArray(arguments, argumentsCount);
 	} while (status == EXIT_SUCCESS);
 
+	free(command);
+	for (int i = 0; i < MAX_ARGUMENTS_COUNT; i++)
+	{
+		free(arguments[i]);
+	}
+	free(arguments);
 }
 
-char* getCommand()
+int getCommand(char* command)
 {
-	char* command = (char*)malloc(COMMAND_BUFFER_SIZE * sizeof(char));
-	fprintf(stdout, "Qual comando quer executar? ");
-	fscanf(stdin, "%s", command);
-	return command;
+	fprintf(stdout, "Qual comando quer executar?\n");
+	if (readLine(command, stdin, COMMAND_BUFFER_SIZE) == NULL)
+	{
+		// Invalid line
+		return -1;
+	}
+
+	// Process the command further? 
+	// Check for invalid characters, etc
+	return 0;
 }
 
-char** getArguments(int* argumentsCount)
+int getArguments(char** arguments, int* argumentsCount)
 {
 	fprintf(stdout, "Quantos argumentos você quer digitar? ");
 	fscanf(stdin, "%d", argumentsCount);
-
-	char** args = (char**)malloc(*argumentsCount * sizeof(char*));
-
+	
 	for (int i = 0; i < *argumentsCount; i++)
 	{
 		fprintf(stdout, "Digite o argumento %d: ", i + 1);
 
-		args[i] = (char*)malloc(ARGUMENT_BUFFER_SIZE * sizeof(char));
-		fscanf(stdin, "%s", args[i]);
+		if (readLine(arguments[i], stdin, ARGUMENT_BUFFER_SIZE) == NULL)
+		{
+			return -1;
+		}
+		//fprintf(stdout, "\n");
 	}
-	return args;
-}
-
-void freeArray(void** array, int count)
-{
-	for (int i = 0; i < count; i++)
-	{
-		free(array[i]);
-	}
-	free(array);
+	return 0;
 }
