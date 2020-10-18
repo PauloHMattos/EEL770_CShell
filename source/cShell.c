@@ -10,6 +10,7 @@
 
 int main(int argc, char **argv)
 {
+  	signal(SIGUSR1, signalHandler);
 	loop();
 	return EXIT_SUCCESS;
 }
@@ -27,9 +28,18 @@ void loop()
 
 	do
 	{
+		state = 0;
+		if ((getCommand(command) != EXIT_SUCCESS) || state != EXIT_SUCCESS)
+		{
+			continue;
+		}
+
 		int argumentsCount = 0;
-		int commandStatus = getCommand(command);
-		int argumentsStatus = getArguments(arguments, &argumentsCount);
+		if ((getArguments(arguments, &argumentsCount) != EXIT_SUCCESS) || state != EXIT_SUCCESS)
+		{
+			continue;
+		}
+
 		launchProgram(command, arguments, argumentsCount);
 
 	} while (status == EXIT_SUCCESS);
@@ -49,57 +59,62 @@ int getCommand(char* command)
 	{
 		logError("Unable to read command. Execution aborted");
 		// Invalid line
-		return -1;
+		return EXIT_FAILURE;
 	}
 
 	// Process the command further? 
 	// Check for invalid characters, etc
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int getArguments(char** arguments, int* argumentsCount)
 {
 	printf("Quantos argumentos você quer digitar? ");
-	//scanf("%d", argumentsCount);
-	argumentsCount = 3;
+	scanf("%d", argumentsCount);
+	//*argumentsCount = 3;
 
-	for (int i = 0; i < argumentsCount; i++)
+	for (int i = 1; i < (*argumentsCount) + 1; i++)
 	{
-		printf("Digite o argumento %d \n", i + 1);
+		//printf("Digite o argumento %d \n", i);
 		
 		if (readLine(arguments[i], stdin, ARGUMENT_BUFFER_SIZE) == NULL)
 		{
 			logError("Unable to read argument. Execution aborted");
-			return -1;
+			return EXIT_FAILURE;
 		}
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int launchProgram(char* command, char** arguments, int argumentsCount)
 {
+	char *commandPath = (char*)malloc(strlen(command) + sizeof(BIN_PATH));
+	strcpy(commandPath, BIN_PATH);
+	strcat(commandPath, command);
+
+	logDebug(commandPath);
+		arguments[0] = command;
+	for(int i = 1; i < argumentsCount + 1; i++)
+	{
+		logDebug(arguments[i]);
+	}
+
 	pid_t childPid = fork();
 	if (childPid == 0)
 	{
-		char *commandPath = (char*)malloc(strlen(command) + sizeof(BIN_PATH));
-		strcpy(commandPath, BIN_PATH);
-		strcat(commandPath, command);
-
-
-		logDebug(commandPath);
-		for(int i = 0; i < argumentsCount; i++)
-		{
-			logDebug(arguments[i]);
-		}
-
-		execvp(commandPath, arguments);
-		free(commandPath);
-		return 0;
+		execvp (commandPath, arguments);
 	} 
 	else
 	{
 		wait(NULL);
-		logDebug("Task is done");
-		return 0;
+		logDebug("Child task is done");
 	}
+
+	free(commandPath);
+	return EXIT_SUCCESS;
+}
+
+void signalHandler(int signalIndex)
+{
+	state = 1;
 }
