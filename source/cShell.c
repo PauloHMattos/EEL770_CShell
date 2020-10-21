@@ -57,7 +57,7 @@ int getCommand(char* command)
 	fprintf(stdout, "Qual comando quer executar? ");
 	if (readLine(command, stdin, COMMAND_BUFFER_SIZE) == NULL)
 	{
-		logError("Unable to read command. Execution aborted");
+			logError("Não foi possivel ler o comando. Execução abortada");
 		// Invalid line
 		return EXIT_FAILURE;
 	}
@@ -89,7 +89,7 @@ int getArguments(char** arguments, int* argumentsCount)
 		char *arg = (char*)malloc(ARGUMENT_BUFFER_SIZE * sizeof(char*));
 		if (readLine(arg, stdin, ARGUMENT_BUFFER_SIZE) == NULL)
 		{
-			logError("Unable to read argument. Execution aborted");
+			logError("Não foi possivel ler o argumento. Execução abortada");
 			return EXIT_FAILURE;
 		}
 		arguments[i] = arg;
@@ -116,12 +116,17 @@ int launchProgram(char* command, char** arguments, int argumentsCount)
 	pid_t childPid = fork();
 	if (childPid == 0)
 	{
-		execv (commandPath, arguments);
+		int result = execv (commandPath, arguments);
+		if (result = -1)
+		{
+			perror(commandPath);
+			logError("Comando não encontrado");
+		}
 	} 
 	else
 	{
 		wait(NULL);
-		logDebug("Child task is done");
+		logDebug("Processo filho finalizado");
 	}
 
 	free(commandPath);

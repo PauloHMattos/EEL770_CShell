@@ -6,6 +6,7 @@ char *readLine(char* line, FILE* stream, ulong maxLength)
     int lastCharId = 0;
     while((lastCharId = getline(&line, &maxLength, stream)) > 0)
     {
+        // Skip \n lines
         if (lastCharId > 1)
         {
             lastCharId -= 1;
