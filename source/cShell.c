@@ -21,11 +21,6 @@ void loop()
 	char* command = (char*)malloc(COMMAND_BUFFER_SIZE* sizeof(char*));
 	char** arguments = (char**)malloc(MAX_ARGUMENTS_COUNT * sizeof(char*));
 
-	for (int i = 0; i < MAX_ARGUMENTS_COUNT; i++)
-	{
-		arguments[i] = (char*)malloc(ARGUMENT_BUFFER_SIZE * sizeof(char*));
-	}
-
 	do
 	{
 		state = 0;
@@ -59,7 +54,7 @@ void loop()
 
 int getCommand(char* command)
 {
-	fprintf(stdout, "Qual comando quer executar?");
+	fprintf(stdout, "Qual comando quer executar? ");
 	if (readLine(command, stdin, COMMAND_BUFFER_SIZE) == NULL)
 	{
 		logError("Unable to read command. Execution aborted");
@@ -76,20 +71,23 @@ int getArguments(char** arguments, int* argumentsCount)
 {
 	printf("Quantos argumentos você quer digitar? ");
 	scanf("%d", argumentsCount);
-	//*argumentsCount = 3;
-
+	
 	int count = (*argumentsCount);
 	for (int i = 1; i <= count; i++)
 	{
-		printf("Digite o argumento %d ", i);
+		printf("Digite o argumento %d: ", i);
 		
-		if (readLine(arguments[i], stdin, ARGUMENT_BUFFER_SIZE) == NULL)
+		char *arg = (char*)malloc(ARGUMENT_BUFFER_SIZE * sizeof(char*));
+		if (readLine(arg, stdin, ARGUMENT_BUFFER_SIZE) == NULL)
 		{
 			logError("Unable to read argument. Execution aborted");
 			return EXIT_FAILURE;
 		}
+		arguments[i] = arg;
 	}
-	arguments[count] = NULL;
+	
+	// Make sure the argument after the read ones is null
+	arguments[count + 1] = NULL;
 	return EXIT_SUCCESS;
 }
 
@@ -100,12 +98,7 @@ int launchProgram(char* command, char** arguments, int argumentsCount)
 	strcat(commandPath, command);
 
 	logDebug(commandPath);
-
 	arguments[0] = command;
-	arguments[1] = "8.8.8.8";
-	arguments[2] = "-c";
-	arguments[3] = "50";
-
 	for(int i = 0; i <= argumentsCount; i++)
 	{
 		logDebug(arguments[i]);

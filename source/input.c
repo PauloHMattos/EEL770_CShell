@@ -1,17 +1,20 @@
 #include <stdlib.h>
 #include "input.h"
 
-char *readLine(char *line, FILE *stream, ulong maxLength)
+char *readLine(char* line, FILE* stream, ulong maxLength)
 {
-    int lastCharId = getline(&line, &maxLength, stream);
-    if (lastCharId != 0)
+    int lastCharId = 0;
+    while((lastCharId = getline(&line, &maxLength, stream)) > 0)
     {
-        lastCharId -= 1;
-        if(line[lastCharId] == '\n')
+        if (lastCharId > 1)
         {
-        	line[lastCharId] = '\0';
+            lastCharId -= 1;
+            if(line[lastCharId] == '\n')
+            {
+                line[lastCharId] = '\0';
+            }
+            return line;
         }
-        return line;
     }
     return NULL;
 }
