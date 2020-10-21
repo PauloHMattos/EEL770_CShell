@@ -10,7 +10,12 @@
 
 int main(int argc, char **argv)
 {
-  	signal(SIGUSR1, signalHandler);
+  	if (signal(SIGUSR1, signalHandler) == SIG_ERR)
+	{
+		fprintf(stderr, "Erro ao registrar handler de sinal. Execução finalizada");
+		logError("Não foi possivel registrar o handler do sinal SIGUSR1");
+		return 0;
+	}
 	loop();
 	return EXIT_SUCCESS;
 }
@@ -57,7 +62,7 @@ int getCommand(char* command)
 	fprintf(stdout, "Qual comando quer executar? ");
 	if (readLine(command, stdin, COMMAND_BUFFER_SIZE) == NULL)
 	{
-			logError("Não foi possivel ler o comando. Execução abortada");
+		fprintf(stdin, "Não foi possivel ler o comando. Execução abortada");
 		// Invalid line
 		return EXIT_FAILURE;
 	}
@@ -89,7 +94,7 @@ int getArguments(char** arguments, int* argumentsCount)
 		char *arg = (char*)malloc(ARGUMENT_BUFFER_SIZE * sizeof(char*));
 		if (readLine(arg, stdin, ARGUMENT_BUFFER_SIZE) == NULL)
 		{
-			logError("Não foi possivel ler o argumento. Execução abortada");
+			fprintf(stdin, "Não foi possivel ler o argumento. Execução abortada");
 			return EXIT_FAILURE;
 		}
 		arguments[i] = arg;
@@ -144,5 +149,11 @@ int checkSignal()
 
 void signalHandler(int signalIndex)
 {
-	state = 1;
+	// Safety check
+	if (signalIndex == SIGUSR1)
+	{
+		logDebug("Sinal SIGUSR1 recebido");
+		//printf("Sinal SIGUSR1 recebido\n");
+		state = 1;
+	}
 }
