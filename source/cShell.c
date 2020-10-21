@@ -29,13 +29,13 @@ void loop()
 			arguments[i] = NULL;
 		}
 
-		if ((getCommand(command) != EXIT_SUCCESS) || state != EXIT_SUCCESS)
+		if (getCommand(command) != EXIT_SUCCESS)
 		{
 			continue;
 		}
 
 		int argumentsCount = 0;
-		if ((getArguments(arguments, &argumentsCount) != EXIT_SUCCESS) || state != EXIT_SUCCESS)
+		if (getArguments(arguments, &argumentsCount) != EXIT_SUCCESS)
 		{
 			continue;
 		}
@@ -62,6 +62,10 @@ int getCommand(char* command)
 		return EXIT_FAILURE;
 	}
 
+	if (checkSignal() != EXIT_SUCCESS)
+	{
+		return EXIT_FAILURE;
+	}
 	// Process the command further? 
 	// Check for invalid characters, etc
 	return EXIT_SUCCESS;
@@ -75,6 +79,11 @@ int getArguments(char** arguments, int* argumentsCount)
 	int count = (*argumentsCount);
 	for (int i = 1; i <= count; i++)
 	{
+		if (checkSignal() != EXIT_SUCCESS)
+		{
+			return EXIT_FAILURE;
+		}
+
 		printf("Digite o argumento %d: ", i);
 		
 		char *arg = (char*)malloc(ARGUMENT_BUFFER_SIZE * sizeof(char*));
@@ -85,7 +94,7 @@ int getArguments(char** arguments, int* argumentsCount)
 		}
 		arguments[i] = arg;
 	}
-	
+
 	// Make sure the argument after the read ones is null
 	arguments[count + 1] = NULL;
 	return EXIT_SUCCESS;
@@ -117,6 +126,15 @@ int launchProgram(char* command, char** arguments, int argumentsCount)
 
 	free(commandPath);
 	return EXIT_SUCCESS;
+}
+
+int checkSignal()
+{
+	if (state == 0)
+	{
+		return EXIT_SUCCESS;
+	}
+	return EXIT_FAILURE;
 }
 
 void signalHandler(int signalIndex)
