@@ -1,47 +1,36 @@
+#include "Constants.h"
 #include "debug.h"
 #include <stdlib.h>
-#include "Constants.h"
 
-void log(FILE* file, char* message)
+
+void logMessage(FILE* file, const char* message)
 {
-    fprintf(file, message);
+    fprintf(file, "%s", message);
 }
 
-void logDebug(char* message)
+void logDebug(const char* message)
 {
-    #if DEBUG
-
-    log(stdout, "\033[1;36m");
-    log(stdout, "[DEBUG]: ");
-    log(stdout, "\033[0m");
-    log(stdout, message);
-    log(stdout, "\n");
-
-    #endif
+    logMessage(stdout, "\033[1;36m");
+    logMessage(stdout, "[DEBUG]: ");
+    logMessage(stdout, "\033[0m");
+    logMessage(stdout, message);
+    logMessage(stdout, "\n");
 }
 
-void logError(char* message)
+void logError(const char* message)
 {
-    #if DEBUG
-
-    log(stderr, "\033[1;31m");
-    log(stderr, "[ERROR]: ");
-    log(stderr, "\033[0m");
-    log(stderr, message);
-    log(stderr, "\n");
-
-    #endif
+    logMessage(stderr, "\033[1;31m");
+    logMessage(stderr, "[ERROR]: ");
+    logMessage(stderr, "\033[0m");
+    logMessage(stderr, message);
+    logMessage(stderr, "\n");
 }
 
-void logWarning(char* message)
+void logWarning(const char* message)
 {
-    #if DEBUG
-
-    log(stdout, "\033[1;33m");
-    log(stdout, "[WARNING]: ");
-    log(stdout, "\033[0m");
-    log(stdout, message);
-    log(stdout, "\n");
-
-    #endif
+    logMessage(stdout, "\033[1;33m");
+    logMessage(stdout, "[WARNING]: ");
+    logMessage(stdout, "\033[0m");
+    logMessage(stdout, message);
+    logMessage(stdout, "\n");
 }

@@ -8,12 +8,14 @@
 #include "memory.h"
 #include "debug.h"
 
-int main(int argc, char **argv)
+int main()
 {
   	if (signal(SIGUSR1, signalHandler) == SIG_ERR)
 	{
 		fprintf(stderr, "Erro ao registrar handler de sinal. Execução finalizada");
+#if DEBUG
 		logError("Não foi possivel registrar o handler do sinal SIGUSR1");
+#endif
 		return 0;
 	}
 	loop();
@@ -63,7 +65,6 @@ int getCommand(char* command)
 	if (readLine(command, stdin, COMMAND_BUFFER_SIZE) == NULL)
 	{
 		fprintf(stdin, "Não foi possivel ler o comando. Execução abortada");
-		// Invalid line
 		return EXIT_FAILURE;
 	}
 
@@ -78,8 +79,8 @@ int getCommand(char* command)
 
 int getArguments(char** arguments, int* argumentsCount)
 {
-	printf("Quantos argumentos você quer digitar? ");
-	scanf("%d", argumentsCount);
+	fprintf(stdout, "Quantos argumentos você quer digitar? ");
+	fscanf(stdin, "%d", argumentsCount);
 	
 	int count = (*argumentsCount);
 	for (int i = 1; i <= count; i++)
@@ -89,12 +90,12 @@ int getArguments(char** arguments, int* argumentsCount)
 			return EXIT_FAILURE;
 		}
 
-		printf("Digite o argumento %d: ", i);
+		fprintf(stdout, "Digite o argumento %d: ", i);
 		
 		char *arg = (char*)malloc(ARGUMENT_BUFFER_SIZE * sizeof(char*));
 		if (readLine(arg, stdin, ARGUMENT_BUFFER_SIZE) == NULL)
 		{
-			fprintf(stdin, "Não foi possivel ler o argumento. Execução abortada");
+			fprintf(stdout, "Não foi possivel ler o argumento. Execução abortada");
 			return EXIT_FAILURE;
 		}
 		arguments[i] = arg;
@@ -107,31 +108,42 @@ int getArguments(char** arguments, int* argumentsCount)
 
 int launchProgram(char* command, char** arguments, int argumentsCount)
 {
+	// Add /bin/ to the command since it's needed for the 'execv' routine 
 	char *commandPath = (char*)malloc(strlen(command) + sizeof(BIN_PATH));
 	strcpy(commandPath, BIN_PATH);
 	strcat(commandPath, command);
 
-	logDebug(commandPath);
+	// Assign the command as the first argument. This is needed by 'execv' routine
 	arguments[0] = command;
+
+#if DEBUG
+	logDebug(commandPath);
 	for(int i = 0; i <= argumentsCount; i++)
 	{
 		logDebug(arguments[i]);
 	}
+#endif
 
 	pid_t childPid = fork();
 	if (childPid == 0)
 	{
 		int result = execv (commandPath, arguments);
-		if (result = -1)
+
+		// Unable to initiate the programam in 'command'
+		if (result == -1)
 		{
 			perror(commandPath);
-			logError("Comando não encontrado");
+#if DEBUG
+			logError("Não foi possivel iniciar o programa");
+#endif
 		}
 	} 
 	else
 	{
 		wait(NULL);
+#if DEBUG
 		logDebug("Processo filho finalizado");
+#endif
 	}
 
 	free(commandPath);
