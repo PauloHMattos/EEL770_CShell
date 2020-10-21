@@ -1,11 +1,12 @@
 #include <stdlib.h>
 #include "input.h"
 
-char *readLine(char *line, FILE *stream, uint maxLength)
+char *readLine(char *line, FILE *stream, ulong maxLength)
 {
-    if (fgets(line, maxLength - 1, stream) != NULL)
+    int lastCharId = getline(&line, &maxLength, stream);
+    if (lastCharId != 0)
     {
-        int lastCharId = strlen(line) - 1;
+        lastCharId -= 1;
         if(line[lastCharId] == '\n')
         {
         	line[lastCharId] = '\0';

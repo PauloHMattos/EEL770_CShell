@@ -29,6 +29,11 @@ void loop()
 	do
 	{
 		state = 0;
+		for (int i = 0; i < MAX_ARGUMENTS_COUNT; i++)
+		{
+			arguments[i] = NULL;
+		}
+
 		if ((getCommand(command) != EXIT_SUCCESS) || state != EXIT_SUCCESS)
 		{
 			continue;
@@ -54,7 +59,7 @@ void loop()
 
 int getCommand(char* command)
 {
-	fprintf(stdout, "Qual comando quer executar?\n");
+	fprintf(stdout, "Qual comando quer executar?");
 	if (readLine(command, stdin, COMMAND_BUFFER_SIZE) == NULL)
 	{
 		logError("Unable to read command. Execution aborted");
@@ -73,9 +78,10 @@ int getArguments(char** arguments, int* argumentsCount)
 	scanf("%d", argumentsCount);
 	//*argumentsCount = 3;
 
-	for (int i = 1; i < (*argumentsCount) + 1; i++)
+	int count = (*argumentsCount);
+	for (int i = 1; i <= count; i++)
 	{
-		//printf("Digite o argumento %d \n", i);
+		printf("Digite o argumento %d ", i);
 		
 		if (readLine(arguments[i], stdin, ARGUMENT_BUFFER_SIZE) == NULL)
 		{
@@ -83,6 +89,7 @@ int getArguments(char** arguments, int* argumentsCount)
 			return EXIT_FAILURE;
 		}
 	}
+	arguments[count] = NULL;
 	return EXIT_SUCCESS;
 }
 
@@ -93,8 +100,13 @@ int launchProgram(char* command, char** arguments, int argumentsCount)
 	strcat(commandPath, command);
 
 	logDebug(commandPath);
-		arguments[0] = command;
-	for(int i = 1; i < argumentsCount + 1; i++)
+
+	arguments[0] = command;
+	arguments[1] = "8.8.8.8";
+	arguments[2] = "-c";
+	arguments[3] = "50";
+
+	for(int i = 0; i <= argumentsCount; i++)
 	{
 		logDebug(arguments[i]);
 	}
@@ -102,7 +114,7 @@ int launchProgram(char* command, char** arguments, int argumentsCount)
 	pid_t childPid = fork();
 	if (childPid == 0)
 	{
-		execvp (commandPath, arguments);
+		execv (commandPath, arguments);
 	} 
 	else
 	{
