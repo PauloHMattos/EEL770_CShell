@@ -27,14 +27,14 @@ void loop()
 	int status = 0;
 	char* command = (char*)malloc(COMMAND_BUFFER_SIZE* sizeof(char*));
 	char** arguments = (char**)malloc(MAX_ARGUMENTS_COUNT * sizeof(char*));
+	for (int i = 0; i < MAX_ARGUMENTS_COUNT; i++)
+	{
+		arguments[i] = (char*)malloc(ARGUMENT_BUFFER_SIZE * sizeof(char*));
+	}
 
 	do
 	{
 		state = 0;
-		for (int i = 0; i < MAX_ARGUMENTS_COUNT; i++)
-		{
-			arguments[i] = NULL;
-		}
 
 		if (getCommand(command) != EXIT_SUCCESS)
 		{
@@ -47,16 +47,16 @@ void loop()
 			continue;
 		}
 
-		launchProgram(command, arguments, argumentsCount);
+		status = launchProgram(command, arguments, argumentsCount);
 
-	} while (status == EXIT_SUCCESS);
+	} while (status != EXIT_SUCCESS);
 
-	free(command);
 	for (int i = 0; i < MAX_ARGUMENTS_COUNT; i++)
 	{
 		free(arguments[i]);
 	}
 	free(arguments);
+	free(command);
 }
 
 int getCommand(char* command)
@@ -92,13 +92,11 @@ int getArguments(char** arguments, int* argumentsCount)
 
 		fprintf(stdout, "Digite o argumento %d: ", i);
 		
-		char *arg = (char*)malloc(ARGUMENT_BUFFER_SIZE * sizeof(char*));
-		if (readLine(arg, stdin, ARGUMENT_BUFFER_SIZE) == NULL)
+		if (readLine(arguments[i], stdin, ARGUMENT_BUFFER_SIZE) == NULL)
 		{
 			fprintf(stdout, "Não foi possivel ler o argumento. Execução abortada");
 			return EXIT_FAILURE;
 		}
-		arguments[i] = arg;
 	}
 
 	// Make sure the argument after the read ones is null
